@@ -20,3 +20,28 @@ class Publications(Base):
     raw_html = Column(Text)
     text_extratect = Column(Text)
     dat_insercao = Column(TIMESTAMP, server_default=func.current_timestamp())
+
+
+class LlmPipeline(Base):
+    __tablename__ = "llm_pipeline"
+    __table_args__ = {"schema": "nasa"}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    publication_id = Column(Integer, nullable=False)
+    stage = Column(String(50))  
+    status = Column(String(50), default="pending") 
+    result_json = Column(JSONB)  
+    message = Column(Text)  
+    dat_insercao = Column(TIMESTAMP, server_default=func.current_timestamp())
+
+
+class LlmMemory(Base):
+    __tablename__ = "llm_memory"
+    __table_args__ = {"schema": "nasa"}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pipeline_id = Column(Integer, nullable=False)
+    model_name = Column(String(50))
+    chunk_index = Column(Integer)
+    context_json = Column(JSONB)
+    dat_insercao = Column(TIMESTAMP, server_default=func.current_timestamp())

@@ -53,14 +53,68 @@ class Database:
             )
             session.add(pub)
             session.commit()
-            log.info(f"✅ Save the database: {title}")
+            log.info(f"Save the database: {title}")
             return "success"
 
         except Exception as errors:
             session.rollback()
-            message = f"❌ Error saving to the database {title}: {errors}"
+            message = f"Error saving to the database {title}: {errors}"
             log.error(message)
             raise DbError(message) from errors
 
+        finally:
+            session.close()
+
+    def insert_llm_pipeline(self, publication_id, stage, result_json=None, status="running", message=None):
+        """Creates or updates the execution record of an LLM step"""
+        session = self.Session()
+        try:
+            pipeline = LlmPipeline(
+                publication_id=publication_id,
+                stage=stage,
+                result_json=result_json,
+                status=status,
+                message=message,
+            )
+            session.add(pipeline)
+            session.commit()
+            return pipeline.id
+
+        except Exception as errors:
+            session.rollback()
+            log.error(f"Error saving pipeline {stage}: {errors}")
+            raise DbError(errors)
+        finally:
+            session.close()
+
+    def insert_llm_memory(self, pipeline_id, model_name, chunk_index, context_json):
+        """Saves the state (incremental memory) of an LLM run"""
+        session = self.Session()
+        try:
+            mem = LlmMemory(
+                pipeline_id=pipeline_id,
+                model_name=model_name,
+                chunk_index=chunk_index,
+                context_json=context_json,
+            )
+            session.add(mem)
+            session.commit()
+            return mem.id
+
+        except Exception as errors:
+            session.rollback()
+            log.error(f"Error saving memory {model_name}: {errors}")
+            raise DbError(errors)
+        finally:
+            session.close()
+
+    def get_documents(self, limit=10):
+        """Search for documents not yet processed"""
+        session = self.Session()
+        try:
+            return session.query(Publications).limit(limit).all()
+        except Exception as errors:
+            log.error(f"Error fetching documents: {errors}")
+            raise DbError(e)
         finally:
             session.close()
