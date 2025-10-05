@@ -118,3 +118,20 @@ class Database:
             raise DbError(e)
         finally:
             session.close()
+
+    def get_last_llm_memory(self, pipeline_id, model_name):
+        """Retrieve the last analysis of the document 
+        to continue and assimilate where it left off
+        """
+        session = self.Session()
+        try:
+            record = (session.query(LlmMemory)
+                    .filter_by(pipeline_id=pipeline_id, model_name=model_name)
+                    .order_by(LlmMemory.id.desc())
+                    .first())
+            return record.context_json if record else None
+        except Exception as errors:
+            log.error(f"Error fetching memory: {errors}")
+            raise DbError(errors)
+        finally:
+            session.close()
