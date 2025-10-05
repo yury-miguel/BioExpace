@@ -1,9 +1,14 @@
-2025-10-05 22:31:58,829 - INFO - Fetched 100 documents for index
-2025-10-05 22:32:00,916 - INFO - Fetched 602 documents for API
-2025-10-05 22:32:02,814 - INFO - Fetched 16 total themes
-2025-10-05 22:32:04,655 - INFO - Fetched 16 total themes
-2025-10-05 22:32:24,899 - INFO - Fetched document 1: Mice in Bion-M 1 space mission: training and selection
-2025-10-05 22:32:34,145 - INFO - Fetched 100 documents for index
-2025-10-05 22:32:36,512 - INFO - Fetched 602 documents for API
-2025-10-05 22:32:38,416 - INFO - Fetched 16 total themes
-2025-10-05 22:32:40,635 - INFO - Fetched 16 total themes
+2025-10-05 22:35:32,419 - INFO - Fetched 100 documents for index
+2025-10-05 22:35:32,700 - INFO - Fetched 100 documents for index
+2025-10-05 22:35:35,113 - INFO - Fetched 602 documents for API
+2025-10-05 22:35:36,883 - INFO - Fetched 100 documents for index
+2025-10-05 22:35:37,307 - INFO - Fetched 16 total themes
+2025-10-05 22:35:39,174 - INFO - Fetched 602 documents for API
+2025-10-05 22:35:41,395 - INFO - Fetched 16 total themes
+2025-10-05 22:35:43,652 - INFO - Fetched 16 total themes
+2025-10-05 22:36:18,975 - INFO - Fetched document 1: Mice in Bion-M 1 space mission: training and selection
+2025-10-05 22:36:52,515 - INFO - Fetched 100 documents for index
+2025-10-05 22:36:55,204 - INFO - Fetched 602 documents for API
+2025-10-05 22:36:57,546 - INFO - Fetched 16 total themes
+2025-10-05 22:36:59,516 - INFO - Fetched 16 total themes
+2025-10-05 22:39:15,027 - INFO - Fetched document 1: Mice in Bion-M 1 space mission: training and selection

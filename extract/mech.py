@@ -23,5 +23,5 @@ def init_scrapy():
 
 
 if __name__ == "__main__":
-    teste = init_scrapy()
-    print(f"FINALLY: {teste}")
+    init = init_scrapy()
+    print(f"FINALLY: {init}")
