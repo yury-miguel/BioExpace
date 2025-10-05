@@ -110,14 +110,22 @@ class Database:
         finally:
             session.close()
 
-    def get_documents(self, limit=10):
-        """Search for documents not yet processed"""
+    def get_documents(self, limit=10, id=None):
+        """Busca documentos da base; pode filtrar por ID ou limitar o total."""
         session = self.Session()
         try:
-            return session.query(Publications).limit(limit).all()
-        except Exception as errors:
-            log.error(f"Error fetching documents: {errors}")
+            query = session.query(Publications)
+            if id is not None:
+                result = query.filter(Publications.id == id).all()
+            else:
+                result = query.limit(limit).all()
+
+            return result
+
+        except Exception as e:
+            log.error(f"Erro ao buscar documentos (id={id}, limit={limit}): {e}")
             raise DbError(e)
+
         finally:
             session.close()
 
