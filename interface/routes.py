@@ -33,11 +33,30 @@ def init_app(app, handler: HandlerDatabase):
                     'date': doc.dat_insercao.strftime('%Y-%m-%d'),
                     'themes': themes
                 })
-            print("Documentos: ",processed_documents[0]["themes"])
             log.info(f"Fetched {len(processed_documents)} documents for index")
             return render_template('index.html', documents=processed_documents)
         except Exception as e:
             log.error(f"Error in index route: {e}")
+            return jsonify({'error': 'Failed to load documents'}), 500
+
+    @app.route('/api/documents', methods=['GET'])
+    def api_documents():
+        try:
+            documents = handler.call('get_documents', limit=1000)
+            processed_documents = []
+            for doc in documents:
+                pipeline = handler.call('get_last_llm_memory', pipeline_id=doc.id, model_name='qwen')
+                themes = pipeline.get('themes', {}) if pipeline else {}
+                processed_documents.append({
+                    'id': doc.id,
+                    'title': doc.title,
+                    'url': doc.url,
+                    'date': doc.dat_insercao.strftime('%Y-%m-%d'),
+                    'themes': themes
+                })
+            return jsonify(processed_documents)
+        except Exception as e:
+            log.error(f"Error fetching documents API: {e}")
             return jsonify({'error': 'Failed to load documents'}), 500
 
     @app.route('/document/<int:doc_id>')
@@ -79,4 +98,19 @@ def init_app(app, handler: HandlerDatabase):
             return jsonify(themes)
         except Exception as e:
             log.error(f"Error in themes API: {e}")
+            return jsonify({'error': 'Failed to fetch themes'}), 500
+
+    @app.route('/api/themes/all', methods=['GET'])
+    def api_all_themes():
+        try:
+            documents = handler.call('get_documents', limit=1000)
+            themeCounts = {}
+            for doc in documents:
+                pipeline = handler.call('get_last_llm_memory', pipeline_id=doc.id, model_name='qwen')
+                if pipeline and 'themes' in pipeline:
+                    for theme in pipeline['themes']:
+                        themeCounts[theme] = (themeCounts.get(theme, 0) + 1)
+            return jsonify(themeCounts)
+        except Exception as e:
+            log.error(f"Error fetching all themes: {e}")
             return jsonify({'error': 'Failed to fetch themes'}), 500

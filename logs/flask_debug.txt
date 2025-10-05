@@ -1,1 +1,0 @@
-2025-10-05 15:09:53,974 - INFO - Fetched 100 documents for index
