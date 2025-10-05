@@ -52,7 +52,14 @@ def init_app(app, handler: HandlerDatabase):
                     'title': doc.title,
                     'url': doc.url,
                     'date': doc.dat_insercao.strftime('%Y-%m-%d'),
-                    'themes': themes
+                    'themes': {
+                        theme: {
+                            'points': details.get('points', []),
+                            'cause_effects': details.get('cause_effects', []),
+                            'observations': details.get('observations', [])
+                        }
+                        for theme, details in (pipeline.get('themes', {}) if pipeline else {}).items()
+                    }
                 })
             return jsonify(processed_documents)
         except Exception as e:

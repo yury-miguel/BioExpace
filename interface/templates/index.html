@@ -35,7 +35,7 @@
 
         <div class="col-md-4 mb-2">
             <div class="card sidebar-card h-100">
-                <div class="card-body">
+                <div class="card-body" style="overflow-y: auto;">
                     <h5 class="sidebar-title">Theme Distribution</h5>
                     <div id="barChart" style="height: 180px;"></div>
                 </div>
@@ -45,31 +45,53 @@
 
     <!-- Document List -->
     <div id="documentList" class="row">
-        {% for doc in documents %}
-        <div class="col-md-6 col-lg-4 mb-4 document-card">
-            <div class="card doc-card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="doc-title">{{ doc.title }}</h5>
-                    <p class="doc-date"><small>{{ doc.date }}</small></p>
-
-                    <!-- Themes & Insights -->
-                    <div class="doc-insights mb-2">
-                        {% for theme, details in doc.themes.items() %}
-                        <span class="theme-tag" title="{{ theme }}">{{ theme }}</span>
-                        <ul class="mb-1">
-                            {% for point in details.points[:2] %}
-                            <li>{{ point | truncate(60, True) }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endfor %}
+        {% if documents %}
+            {% for doc in documents %}
+            <div class="col-md-6 col-lg-4 mb-4 document-card">
+                <div class="card doc-card h-100">
+                    <div class="card-header">
+                        <h5 class="doc-title mb-0">{{ doc.title | truncate(50, True) }}</h5>
+                        <p class="doc-date mb-0"><small>Published: {{ doc.date }}</small></p>
                     </div>
 
-                    <!-- Explore Button -->
-                    <a href="{{ url_for('document', doc_id=doc.id) }}" class="btn btn-purple mt-auto">Explore</a>
+                    <div class="card-body">
+                        <div class="doc-themes mb-3">
+                            <h6 class="section-title">Themes</h6>
+                            <div class="theme-tags">
+                                {% for theme in doc.themes.keys() %}
+                                    <span class="theme-tag" title="{{ theme }}">{{ theme | truncate(25, True) }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="doc-insights">
+                            <h6 class="section-title">Insights</h6>
+                            {% for theme, details in doc.themes.items() %}
+                            <div class="theme-insights mb-2">
+                                <span class="theme-label">{{ theme | truncate(25, True) }}</span>
+                                <ul class="insights-list">
+                                    {% if details.observations %}
+                                        {% for obs in details.observations %}
+                                        <li class="insight-item"><span class="insight-type">Observations:</span> {{ obs | truncate(60, True) }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="{{ url_for('document', doc_id=doc.id) }}" class="btn btn-purple w-100">Explore Details</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center text-muted">
+                <p>No documents found. Try adjusting your search or filter.</p>
+            </div>
+        {% endif %}
     </div>
 
     <!-- Pagination -->

@@ -8,19 +8,12 @@ body.bg-white-dashboard {
 .dashboard-title {
     font-family: 'Orbitron', sans-serif;
     color: #6e0eff;
-    font-size: 2.0rem;
+    font-size: 2rem;
     margin-bottom: 1.5rem;
 }
 
 /* Sidebar cards */
 .sidebar-card {
-    background: #fff;
-    border: 1px solid #dcdcdc;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.sidebar-card, .doc-card {
     background: #fff;
     border: 1px solid #dcdcdc;
     border-radius: 12px;
@@ -34,24 +27,57 @@ body.bg-white-dashboard {
     margin-bottom: 0.8rem;
 }
 
-/* Document cards */
+/* Document Cards */
 .doc-card {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: #fff;
+    border: 1px solid #e0d9f5;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.doc-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid #e0d9f5;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .doc-title {
     font-weight: 700;
     color: #6e0eff;
-    margin-bottom: 0.3rem;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
 }
 
 .doc-date {
     color: #888;
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.card-body {
+    flex-grow: 1;
+}
+
+/* Themes */
+.section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6e0eff;
+    margin-bottom: 0.25rem;
+}
+
+.theme-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .theme-tag {
@@ -62,16 +88,44 @@ body.bg-white-dashboard {
     font-size: 0.7rem;
     padding: 2px 6px;
     border-radius: 6px;
-    margin-right: 4px;
-    margin-bottom: 4px;
-    max-width: 100%;
     word-wrap: break-word;
 }
 
-.doc-insights ul {
-    padding-left: 18px;
-    margin: 2px 0 4px 0;
-    font-size: 0.85rem;
+/* Insights */
+.theme-insights {
+    margin-top: 6px;
+}
+
+.theme-label {
+    font-weight: 600;
+    color: #6e0eff;
+    font-size: 0.75rem;
+}
+
+.insights-list {
+    list-style: none;
+    padding-left: 12px;
+    margin-top: 2px;
+    font-size: 0.82rem;
+    color: #444;
+}
+
+.insight-item {
+    margin-bottom: 2px;
+    line-height: 1.3;
+}
+
+.insight-type {
+    font-weight: 600;
+    color: #9f57ff;
+    margin-right: 4px;
+}
+
+/* Card Footer */
+.card-footer {
+    border-top: 1px solid #e0d9f5;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
 }
 
 /* Buttons */
@@ -80,6 +134,9 @@ body.bg-white-dashboard {
     color: #fff;
     font-weight: 600;
     border-radius: 6px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    text-align: center;
 }
 
 .btn-purple:hover {
@@ -90,8 +147,10 @@ body.bg-white-dashboard {
 /* Pagination */
 .pagination li a {
     color: #6e0eff;
+    font-weight: 600;
 }
 .pagination li.active a {
     background: #6e0eff;
     color: #fff;
+    font-weight: 600;
 }

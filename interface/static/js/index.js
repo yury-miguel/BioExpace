@@ -1,12 +1,12 @@
 let allDocuments = [];
 let filteredDocuments = [];
 let currentPage = 1;
-const docsPerPage = 12;
+const docsPerPage = 6;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const response = await fetch('/api/documents');
     allDocuments = await response.json();
-    filteredDocuments = allDocuments;  // start with full dataset
+    filteredDocuments = allDocuments;
     displayPage(1);
     buildBarChart();
     buildWordCloud();
@@ -31,27 +31,63 @@ function displayPage(page) {
     container.innerHTML = '';
 
     if (pagedDocs.length === 0) {
-        container.innerHTML = `<p class="text-muted">No documents found.</p>`;
+        container.innerHTML = `<div class="col-12 text-center text-muted"><p>No documents found.</p></div>`;
+        return;
     }
 
     pagedDocs.forEach(doc => {
         const card = document.createElement('div');
-        card.className = 'col-md-6 mb-4 document-card';
-        let themesHTML = '';
-        for (let theme in doc.themes) {
-            const points = doc.themes[theme].points.slice(0,2).map(p => `<li>${p}</li>`).join('');
-            themesHTML += `<span class="theme-tag" title="${theme}">${theme}</span><ul>${points}</ul>`;
-        }
-        card.innerHTML = `
-            <div class="card doc-card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="doc-title">${doc.title}</h5>
-                    <p class="doc-date"><small>${doc.date}</small></p>
-                    <div class="doc-insights mb-2">${themesHTML}</div>
-                    <a href="/document/${doc.id}" class="btn btn-purple mt-auto">Explore</a>
-                </div>
+        card.className = 'col-md-6 col-lg-4 mb-4 document-card';
+
+        // Header HTML
+        let headerHTML = `
+            <div class="card-header">
+                <h5 class="doc-title mb-0">${doc.title}</h5>
+                <p class="doc-date mb-0"><small>Published: ${doc.date}</small></p>
             </div>
         `;
+
+        let themesHTML = '';
+        if (doc.themes && Object.keys(doc.themes).length > 0) {
+            themesHTML += `<div class="doc-themes mb-3"><h6 class="section-title">Themes</h6><div class="theme-tags">`;
+            for (let theme in doc.themes) {
+                themesHTML += `<span class="theme-tag" title="${theme}">${theme}</span>`;
+            }
+            themesHTML += `</div></div>`;
+        }
+
+        let insightsHTML = '';
+        if (doc.themes && Object.keys(doc.themes).length > 0) {
+            insightsHTML += `<div class="doc-insights"><h6 class="section-title">Insights</h6>`;
+            for (let theme in doc.themes) {
+                const details = doc.themes[theme];
+                insightsHTML += `<div class="theme-insights mb-2"><span class="theme-label">${theme}</span><ul class="insights-list">`;
+
+                // Observations
+                if (details.observations && details.observations.length > 0) {
+                    details.observations.forEach(obs => {
+                        insightsHTML += `<li class="insight-item"><span class="insight-type">Observations:</span> ${obs}</li>`;
+                    });
+                }
+
+                insightsHTML += `</ul></div>`;
+            }
+            insightsHTML += `</div>`;
+        }
+
+        let footerHTML = `<div class="card-footer"><a href="/document/${doc.id}" class="btn btn-purple w-100">Explore Details</a></div>`;
+
+        card.innerHTML = `
+            <div class="card doc-card h-100">
+                ${headerHTML}
+                <div class="card-body">
+                    ${themesHTML}
+                    ${insightsHTML}
+                </div>
+                ${footerHTML}
+            </div>
+        `;
+
         container.appendChild(card);
     });
 
@@ -117,7 +153,7 @@ async function buildWordCloud() {
     layout.start();
 
     function drawWordCloud(words) {
-        d3.select("#wordCloud").html(""); // clear previous
+        d3.select("#wordCloud").html("");
         d3.select("#wordCloud").append("svg")
             .attr("width", 250)
             .attr("height", 250)
@@ -140,11 +176,11 @@ async function buildBarChart() {
     const data = Object.entries(themesData).map(([theme, count]) => ({theme, count}));
 
     const container = d3.select("#barChart");
-    container.html(""); // clear previous
+    container.html("");
 
-    const width = container.node().clientWidth; // ajusta largura ao container
-    const height = 180;
-    const margin = {top: 20, right: 10, bottom: 60, left: 40};
+    const width = container.node().clientWidth;
+    const height = 180; 
+    let margin = {top: 10, right: 10, bottom: 60, left: 40};
 
     const svg = container.append("svg")
         .attr("width", width)
@@ -169,33 +205,15 @@ async function buildBarChart() {
         .attr("height", d => y(0) - y(d.count))
         .attr("width", x.bandwidth());
 
-    const xAxis = g => g
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x))
-        .selectAll("text")
-        .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end")
-        .style("font-size", "0.75rem")
-        .call(wrap, x.bandwidth()); // wrap function abaixo
-
-    const yAxis = g => g
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).ticks(5))
-        .selectAll("text")
-        .style("font-size", "0.75rem");
-
-    svg.append("g").call(xAxis);
-    svg.append("g").call(yAxis);
-
-    // Função para quebrar texto longo nos rótulos do eixo x
     function wrap(text, width) {
+        let maxLines = 0;
         text.each(function() {
             const textEl = d3.select(this),
-                  words = textEl.text().split(/\s+/).reverse();
+                words = textEl.text().split(/\s+/).reverse();
             let word,
                 line = [],
                 lineNumber = 0,
-                lineHeight = 1.1, // em ems
+                lineHeight = 1.1,
                 y = textEl.attr("y"),
                 dy = 0,
                 tspan = textEl.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
@@ -206,9 +224,53 @@ async function buildBarChart() {
                     line.pop();
                     tspan.text(line.join(" "));
                     line = [word];
-                    tspan = textEl.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                    tspan = textEl.append("tspan")
+                        .attr("x", 0)
+                        .attr("y", y)
+                        .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                        .text(word);
                 }
             }
+            if (lineNumber + 1 > maxLines) maxLines = lineNumber + 1;
         });
+        return maxLines;
     }
+
+    const xAxisG = svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end")
+        .style("font-size", "0.75rem");
+
+    const maxLines = wrap(xAxisG, x.bandwidth());
+
+    margin.bottom = Math.max(60, maxLines * 14);
+
+    svg.selectAll("g").remove();
+    svg.append("g")
+        .attr("fill", "#6e0eff")
+        .selectAll("rect")
+        .data(data)
+        .join("rect")
+        .attr("x", d => x(d.theme))
+        .attr("y", d => y(d.count))
+        .attr("height", d => y(0) - y(d.count))
+        .attr("width", x.bandwidth());
+
+    svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end")
+        .style("font-size", "0.75rem")
+        .call(wrap, x.bandwidth());
+
+    svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(5))
+        .selectAll("text")
+        .style("font-size", "0.75rem");
 }
