@@ -131,3 +131,9 @@ And of course, the better the LLM model used, the smarter and better your final 
 
 ---
 
+## 📷 Images the software 😀
+![1](images/captura_20251005_193736.png)
+![2](images/captura_20251005_193822.png)
+![3](images/captura_20251005_193902.png)
+![4](images/captura_20251005_193944.png)
+![5](images/captura_20251005_194041.png)
