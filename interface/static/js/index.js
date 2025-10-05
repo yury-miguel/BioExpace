@@ -178,9 +178,8 @@ async function buildBarChart() {
     container.html("");
 
     const width = container.node().clientWidth;
-    const height = 180; 
-    let margin = {top: 10, right: 10, bottom: 60, left: 40};
-
+    const height = 280; 
+    let margin = {top: 10, right: 10, bottom: 100, left: 50}; 
     const svg = container.append("svg")
         .attr("width", width)
         .attr("height", height);
@@ -188,34 +187,18 @@ async function buildBarChart() {
     const x = d3.scaleBand()
         .domain(data.map(d => d.theme))
         .range([margin.left, width - margin.right])
-        .padding(0.2);
-
+        .padding(0.1); 
     const y = d3.scaleLinear()
         .domain([0, d3.max(data, d => d.count)]).nice()
         .range([height - margin.bottom, margin.top]);
 
-    svg.append("g")
-        .attr("fill", "#6e0eff")
-        .selectAll("rect")
-        .data(data)
-        .join("rect")
-        .attr("x", d => x(d.theme))
-        .attr("y", d => y(d.count))
-        .attr("height", d => y(0) - y(d.count))
-        .attr("width", x.bandwidth());
-
+    // Função para quebrar rótulos
     function wrap(text, width) {
-        let maxLines = 0;
         text.each(function() {
             const textEl = d3.select(this),
-                words = textEl.text().split(/\s+/).reverse();
-            let word,
-                line = [],
-                lineNumber = 0,
-                lineHeight = 1.1,
-                y = textEl.attr("y"),
-                dy = 0,
-                tspan = textEl.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+                  words = textEl.text().split(/\s+/).reverse();
+            let word, line = [], lineNumber = 0, lineHeight = 1.1, y = textEl.attr("y"), dy = 0;
+            let tspan = textEl.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
             while (word = words.pop()) {
                 line.push(word);
                 tspan.text(line.join(" "));
@@ -230,24 +213,10 @@ async function buildBarChart() {
                         .text(word);
                 }
             }
-            if (lineNumber + 1 > maxLines) maxLines = lineNumber + 1;
         });
-        return maxLines;
     }
 
-    const xAxisG = svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x))
-        .selectAll("text")
-        .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end")
-        .style("font-size", "0.75rem");
-
-    const maxLines = wrap(xAxisG, x.bandwidth());
-
-    margin.bottom = Math.max(60, maxLines * 14);
-
-    svg.selectAll("g").remove();
+    // Barras
     svg.append("g")
         .attr("fill", "#6e0eff")
         .selectAll("rect")
@@ -264,7 +233,7 @@ async function buildBarChart() {
         .selectAll("text")
         .attr("transform", "rotate(-45)")
         .style("text-anchor", "end")
-        .style("font-size", "0.75rem")
+        .style("font-size", "0.7rem")
         .call(wrap, x.bandwidth());
 
     svg.append("g")

@@ -112,7 +112,7 @@ class Database:
         """Busca documentos da base; pode filtrar por ID ou limitar o total."""
         session = self.Session()
         try:
-            query = session.query(Publications)
+            query = session.query(Publications).order_by(Publications.id.asc())
             if id is not None:
                 result = query.filter(Publications.id == id).all()
             else:
@@ -141,5 +141,39 @@ class Database:
         except Exception as errors:
             log.error(f"Error fetching memory: {errors}")
             raise DbError(errors)
+        finally:
+            session.close()
+
+    def get_all_llm_memories(self, pipeline_id, model_name):
+        """Retrieve all analyses (memories) for a given document and model"""
+        session = self.Session()
+        try:
+            records = (
+                session.query(LlmMemory)
+                .filter_by(pipeline_id=pipeline_id, model_name=model_name)
+                .order_by(LlmMemory.id.asc())
+                .all()
+            )
+            return [r.context_json for r in records if r.context_json]
+        except Exception as errors:
+            log.error(f"Error fetching all memories: {errors}")
+            raise DbError(errors)
+        finally:
+            session.close()
+
+    def get_pipelines_by_publication(self, publication_id):
+        """Retrieve all LLM pipelines associated with a given publication."""
+        session = self.Session()
+        try:
+            pipelines = (
+                session.query(LlmPipeline)
+                .filter(LlmPipeline.publication_id == publication_id)
+                .order_by(LlmPipeline.id.asc())
+                .all()
+            )
+            return pipelines
+        except Exception as e:
+            log.error(f"Error fetching pipelines for publication {publication_id}: {e}")
+            raise DbError(e)
         finally:
             session.close()

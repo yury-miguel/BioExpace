@@ -14,7 +14,6 @@
 
     <div class="container my-5">
 
-
         <div class="mb-3">
             <a href="{{ url_for('index') }}" class="btn btn-secondary">&larr; Back to Dash</a>
         </div>
@@ -40,9 +39,9 @@
         <div class="card mb-4 doc-card">
             <div class="card-body">
                 <h5 class="section-title">Themes & Insights</h5>
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-hover table-striped align-middle">
-                        <thead class="table-light">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
                             <tr>
                                 <th scope="col">Theme</th>
                                 <th scope="col">Finding</th>
