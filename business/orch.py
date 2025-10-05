@@ -65,7 +65,7 @@ class BioInsightPipeline:
             )
             log.info("🏁 LLM pipeline completed for all documents.")
 
-    def chunk_text(self, text: str, max_tokens: int = 1500):
+    def chunk_text(self, text: str, max_tokens: int = 500):
         """Divide the text into chunks with a token limit"""
         enc = tiktoken.get_encoding("cl100k_base")
         tokens = enc.encode(text)
@@ -140,17 +140,20 @@ class BioInsightPipeline:
             ]
 
             try:
-                response = ollama.chat(model="qwen2.5:7b-instruct", messages=messages)
-                raw = json.loads(response["message"]["content"])
+                response = ollama.chat(model="qwen2.5:1.5b-instruct-q4_0", messages=messages)
+                raw_content = response.get("message", {}).get("content", "").strip()
 
-                if raw.startswith("```json"):
-                    raw = raw.removeprefix("```json").removesuffix("```").strip()
+                if raw_content.startswith("```json"):
+                    raw_content = raw_content.removeprefix("```json").removesuffix("```").strip()
+                elif raw_content.startswith("```"):
+                    raw_content = raw_content.removeprefix("```").removesuffix("```").strip()
 
-                if not raw.endswith("}"):
-                    log.debug(f"⚠️ Chunk {i}: JSON seems incomplete, attempting recovery...")
-                    raw += "}"
-                data = json.loads(raw)
-                log.debug(f"🧩 Parsed {len(data.get('themes', {}))} themes from chunk {i}")
+                try:
+                    data = json.loads(raw_content)
+                except json.JSONDecodeError:
+                    log.warning(f"⚠️ Chunk {i}: JSON parse failed. Attempting cleanup...")
+                    raw_content = raw_content.split("```")[0].strip()
+                    data = json.loads(raw_content)
 
                 for theme, details in data.get("themes", {}).items():
                     if theme not in accumulated_themes:
@@ -164,7 +167,7 @@ class BioInsightPipeline:
                 self.handle.call("insert_llm_memory", pipeline_id=pipeline_id, model_name="qwen", chunk_index=i, context_json=data)
                 log.info(f"✅ [Qwen] Chunk {i+1}/{len(chunks)} processed successfully")
             except json.JSONDecodeError:
-                logger.warning(f"Invalid response from Qwen in the chunk: {i}")
+                log.warning(f"Invalid response from Qwen in the chunk: {i}")
             except Exception as e:
                 log.error(f"Error processing Qwen chunk {i}: {e}")
 
@@ -206,7 +209,7 @@ class BioInsightPipeline:
         ]
         try:
             log.info("📡 [Llama] Starting synthesis phase")
-            response = ollama.chat(model="llama3:8b", messages=messages)
+            response = ollama.chat(model="llama3:8b-instruct-q4_0", messages=messages)
             raw = response["message"]["content"].strip()
             if not raw.endswith("}"):
                 raw += "}"
@@ -215,6 +218,6 @@ class BioInsightPipeline:
             log.info("✅ [Llama] Insight synthesis complete")
             return data
         except json.JSONDecodeError:
-            logger.warning("Invalid response from Llama")
+            log.warning("Invalid response from Llama")
         except Exception as e:
             log.error(f"Error processing Llama: {e}")
