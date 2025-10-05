@@ -22,8 +22,11 @@ class BioInsightPipeline:
 
     def run(self):
         docs = self.handle.call("get_documents", limit=5)
+        log.info(f"🚀 Starting LLM interpretation pipeline for {len(docs)} documents")
+
         for doc in docs:
             log.info(f"🧩 Processing {doc.title}")
+            log.debug(f"Document length: {len(doc.text_extratect)} characters")
 
             # === Stage 1: Scientific interpretation (Qwen) ===
             qwen_id = self.handle.call(
@@ -32,7 +35,9 @@ class BioInsightPipeline:
                 stage="qwen_analysis",
                 status="running"
             )
+            log.info(f"🧠 [Qwen] Stage started for publication {doc.id}")
             qwen_output = self.process_qwen(doc.text_extratect, qwen_id)
+            log.info(f"✅ [Qwen] Analysis complete for {doc.title}")
             self.handle.call(
                 "insert_llm_pipeline",
                 publication_id=doc.id,
@@ -48,7 +53,9 @@ class BioInsightPipeline:
                 stage="llama_insight",
                 status="running"
             )
+            log.info(f"📊 [Llama] Generating high-level insights for {doc.title}")
             llama_output = self.process_llama(qwen_output, llama_id)
+            log.info(f"✅ [Llama] Insight synthesis complete for {doc.title}")
             self.handle.call(
                 "insert_llm_pipeline",
                 publication_id=doc.id,
@@ -56,6 +63,7 @@ class BioInsightPipeline:
                 result_json=llama_output,
                 status="success"
             )
+            log.info("🏁 LLM pipeline completed for all documents.")
 
     def chunk_text(self, text: str, max_tokens: int = 1500):
         """Divide the text into chunks with a token limit"""
@@ -80,7 +88,7 @@ class BioInsightPipeline:
         Output must be scientifically rigorous and structured in JSON.
         """
 
-        content = """
+        content_template = """
         Analyze this chunk of the scientific document on space biology. Define main themes emerging from the text (e.g., microgravity-induced bone density loss, radiation-triggered cellular mutations, sex-specific metabolic adaptations). For each theme:
         - Extract important points and impactful discoveries, citing specific mechanisms or findings from the text.
         - Identify cause-effect correlations (e.g., reduced gravity causes decreased osteoblast activity leading to bone resorption).
@@ -96,19 +104,19 @@ class BioInsightPipeline:
             - Highlight interesting observations for future research.
 
         Output strictly in valid JSON without additional text:
-        {
-            "themes": {
-                "theme_name": {
+        {{
+            "themes": {{
+                "theme_name": {{
                     "points": ["point1", "point2"],
                     "cause_effects": ["cause1 -> effect1", "cause2 -> effect2"],
                     "cascade_effects": ["effect1 -> cascade1 -> cascade2"],
                     "observations": ["observation1 with research implication", "observation2"],
                     "impactful": [...],
 
-                },
+                }},
                 ...
-            }
-        }
+            }}
+        }}
 
         Chunk: {chunk}
         """
@@ -117,6 +125,7 @@ class BioInsightPipeline:
         accumulated_themes = {}
 
         for i, chunk in enumerate(chunks):
+            log.info(f"🔬 [Qwen] Processing chunk {i+1}/{len(chunks)} ({len(chunk)} chars)")
             prev_context = self.handle.call(
                 "get_last_llm_memory",
                 pipeline_id=pipeline_id,
@@ -131,11 +140,17 @@ class BioInsightPipeline:
             ]
 
             try:
-                response = ollama.chat(model="qwen2.5", messages=messages)
+                response = ollama.chat(model="qwen2.5:7b-instruct", messages=messages)
                 raw = json.loads(response["message"]["content"])
+
+                if raw.startswith("```json"):
+                    raw = raw.removeprefix("```json").removesuffix("```").strip()
+
                 if not raw.endswith("}"):
+                    log.debug(f"⚠️ Chunk {i}: JSON seems incomplete, attempting recovery...")
                     raw += "}"
                 data = json.loads(raw)
+                log.debug(f"🧩 Parsed {len(data.get('themes', {}))} themes from chunk {i}")
 
                 for theme, details in data.get("themes", {}).items():
                     if theme not in accumulated_themes:
@@ -147,11 +162,13 @@ class BioInsightPipeline:
                             else:
                                 accumulated_themes[theme][key] = values
                 self.handle.call("insert_llm_memory", pipeline_id=pipeline_id, model_name="qwen", chunk_index=i, context_json=data)
+                log.info(f"✅ [Qwen] Chunk {i+1}/{len(chunks)} processed successfully")
             except json.JSONDecodeError:
                 logger.warning(f"Invalid response from Qwen in the chunk: {i}")
             except Exception as e:
                 log.error(f"Error processing Qwen chunk {i}: {e}")
 
+        log.info(f"🧠 [Qwen] Total accumulated themes: {len(accumulated_themes)}")
         return {"themes": accumulated_themes}
 
     def process_llama(self, qwen_data, pipeline_id):
@@ -161,7 +178,7 @@ class BioInsightPipeline:
         Your goal is to assimilate detailed outputs from a space biologist, highlighting patterns, implications, and strategic recommendations for space exploration. 
         Ensure outputs are structured for easy integration into dashboards, with clear, quantifiable, and visually representable elements where possible.
         """
-        content = """
+        content_template = """
         Assimilate the space biologist's outputs (themes with points, cause-effect relationships, cascade effects, observations). Generate comprehensive and impressive insights:
         - Identify areas of scientific progress (e.g., breakthroughs in understanding microgravity's cellular impacts).
         - Highlight knowledge gaps (e.g., limited data on long-term radiation effects in females).
@@ -170,30 +187,32 @@ class BioInsightPipeline:
         - Include an impressive summary (200-300 words) that emphasizes groundbreaking discoveries and their broader implications for human spaceflight.
 
         Output strictly in valid JSON without additional text:
-        {
+        {{
             "insights": [
-                {"category": "progress", "details": ["detail1", "detail2"]},
-                {"category": "gaps", "details": ["gap1", "gap2"]},
-                {"category": "consensus", "details": ["consensus1", "disagreement2"]},
-                {"category": "actionable_insights", "details": ["insight1 for planners", "insight2 for astronauts"]}
+                {{"category": "progress", "details": ["detail1", "detail2"]}},
+                {{"category": "gaps", "details": ["gap1", "gap2"]}},
+                {{"category": "consensus", "details": ["consensus1", "disagreement2"]}},
+                {{"category": "actionable_insights", "details": ["insight1 for planners", "insight2 for astronauts"]}}
             ],
             "impressive_summary": "..."
-        }
+        }}
 
         Biologist's output: {qwen_output}
         """
 
         messages = [
             {"role": "system", "content": system},
-            {"role": "user", "content": content.format(qwen_output=json.dumps(qwen_data, indent=2))}
+            {"role": "user", "content": content_template.format(qwen_output=json.dumps(qwen_data, indent=2))}
         ]
         try:
-            response = ollama.chat(model="llama3.1", messages=messages)
+            log.info("📡 [Llama] Starting synthesis phase")
+            response = ollama.chat(model="llama3:8b", messages=messages)
             raw = response["message"]["content"].strip()
             if not raw.endswith("}"):
                 raw += "}"
             data = json.loads(raw)
             self.handle.call("insert_llm_memory", pipeline_id=pipeline_id, model_name="llama", chunk_index=0, context_json=data)
+            log.info("✅ [Llama] Insight synthesis complete")
             return data
         except json.JSONDecodeError:
             logger.warning("Invalid response from Llama")
