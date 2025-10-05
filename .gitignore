@@ -1,4 +1,5 @@
-/__pycache__/*
+__pycache__
+__pycache__/
 orm/.env
 database_debug.txt
 scrapy_debug.txt
