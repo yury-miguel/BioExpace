@@ -63,12 +63,42 @@ function buildPagination() {
     const pagination = document.getElementById('pagination');
     pagination.innerHTML = '';
 
-    for (let i = 1; i <= totalPages; i++) {
+    // First
+    const firstLi = document.createElement('li');
+    firstLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+    firstLi.innerHTML = `<a class="page-link" href="javascript:displayPage(1)">First</a>`;
+    pagination.appendChild(firstLi);
+
+    // Previous
+    const prevLi = document.createElement('li');
+    prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+    prevLi.innerHTML = `<a class="page-link" href="javascript:displayPage(${currentPage - 1})">Previous</a>`;
+    pagination.appendChild(prevLi);
+
+    // Page Numbers (show max 5 around current)
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+
+    for (let i = startPage; i <= endPage; i++) {
         const li = document.createElement('li');
         li.className = 'page-item' + (i === currentPage ? ' active' : '');
         li.innerHTML = `<a class="page-link" href="javascript:displayPage(${i})">${i}</a>`;
         pagination.appendChild(li);
     }
+
+    // Next
+    const nextLi = document.createElement('li');
+    nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+    nextLi.innerHTML = `<a class="page-link" href="javascript:displayPage(${currentPage + 1})">Next</a>`;
+    pagination.appendChild(nextLi);
+
+    // Last
+    const lastLi = document.createElement('li');
+    lastLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+    lastLi.innerHTML = `<a class="page-link" href="javascript:displayPage(${totalPages})">Last</a>`;
+    pagination.appendChild(lastLi);
 }
 
 async function buildWordCloud() {
@@ -112,7 +142,9 @@ async function buildBarChart() {
     const container = d3.select("#barChart");
     container.html(""); // clear previous
 
-    const width = 250, height = 250, margin = {top: 20, right: 10, bottom: 50, left: 40};
+    const width = container.node().clientWidth; // ajusta largura ao container
+    const height = 180;
+    const margin = {top: 20, right: 10, bottom: 60, left: 40};
 
     const svg = container.append("svg")
         .attr("width", width)
@@ -121,7 +153,7 @@ async function buildBarChart() {
     const x = d3.scaleBand()
         .domain(data.map(d => d.theme))
         .range([margin.left, width - margin.right])
-        .padding(0.1);
+        .padding(0.2);
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(data, d => d.count)]).nice()
@@ -137,14 +169,46 @@ async function buildBarChart() {
         .attr("height", d => y(0) - y(d.count))
         .attr("width", x.bandwidth());
 
-    svg.append("g")
+    const xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x))
         .selectAll("text")
         .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end");
+        .style("text-anchor", "end")
+        .style("font-size", "0.75rem")
+        .call(wrap, x.bandwidth()); // wrap function abaixo
 
-    svg.append("g")
+    const yAxis = g => g
         .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y).ticks(5))
+        .selectAll("text")
+        .style("font-size", "0.75rem");
+
+    svg.append("g").call(xAxis);
+    svg.append("g").call(yAxis);
+
+    // Função para quebrar texto longo nos rótulos do eixo x
+    function wrap(text, width) {
+        text.each(function() {
+            const textEl = d3.select(this),
+                  words = textEl.text().split(/\s+/).reverse();
+            let word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, // em ems
+                y = textEl.attr("y"),
+                dy = 0,
+                tspan = textEl.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = textEl.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                }
+            }
+        });
+    }
 }
