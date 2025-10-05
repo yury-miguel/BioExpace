@@ -137,3 +137,7 @@ And of course, the better the LLM model used, the smarter and better your final 
 ![3](images/captura_20251005_193902.png)
 ![4](images/captura_20251005_193944.png)
 ![5](images/captura_20251005_194041.png)
+![6](images/captura_de_tela_2025_10_05_19590.png)
+![7](images/captura_de_tela_2025_10_05_195740.png)
+![8](images/captura_de_tela_2025_10_05_195839.png)
+![9](images/captura_de_tela_2025_10_05_195850.png)
