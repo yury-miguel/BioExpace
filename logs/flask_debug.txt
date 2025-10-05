@@ -1,0 +1,4 @@
+2025-10-05 17:27:29,012 - INFO - Fetched 100 documents for index
+2025-10-05 17:27:30,805 - INFO - Fetched document 1: Mice in Bion-M 1 space mission: training and selection
+2025-10-05 17:27:35,140 - INFO - Fetched 100 documents for index
+2025-10-05 17:27:40,613 - INFO - Fetched 100 documents for index
