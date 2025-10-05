@@ -63,13 +63,12 @@ function displayPage(page) {
                 const details = doc.themes[theme];
                 insightsHTML += `<div class="theme-insights mb-2"><span class="theme-label">${theme}</span><ul class="insights-list">`;
 
-                // Observations
-                if (details.observations && details.observations.length > 0) {
-                    details.observations.forEach(obs => {
-                        insightsHTML += `<li class="insight-item"><span class="insight-type">Observations:</span> ${obs}</li>`;
+                if (details.cause_effects && details.cause_effects.length > 0) {
+                    details.cause_effects.slice(0, 1).forEach(ce => {
+                        insightsHTML += `<li class="insight-item"><span class="insight-type">Cause & Effect:</span> ${ce}</li>`;
                     });
                 }
-
+                
                 insightsHTML += `</ul></div>`;
             }
             insightsHTML += `</div>`;

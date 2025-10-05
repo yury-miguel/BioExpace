@@ -43,6 +43,9 @@
         </div>
     </div>
 
+    <!-- Separator Line -->
+    <div class="filters-docs-separator my-4"></div>
+
     <!-- Document List -->
     <div id="documentList" class="row">
         {% if documents %}
@@ -70,9 +73,9 @@
                             <div class="theme-insights mb-2">
                                 <span class="theme-label">{{ theme | truncate(25, True) }}</span>
                                 <ul class="insights-list">
-                                    {% if details.observations %}
-                                        {% for obs in details.observations %}
-                                        <li class="insight-item"><span class="insight-type">Observations:</span> {{ obs | truncate(60, True) }}</li>
+                                    {% if details.cause_effects %}
+                                        {% for ce in details.cause_effects[:1] %}
+                                        <li class="insight-item"><span class="insight-type">Cause & Effect:</span> {{ ce | truncate(60, True) }}</li>
                                         {% endfor %}
                                     {% endif %}
                                 </ul>

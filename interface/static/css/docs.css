@@ -1,0 +1,121 @@
+body.bg-white-dashboard {
+    background: #f5f5f5;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+}
+
+/* Document card styling */
+.doc-card {
+    background: #fff;
+    border: 1px solid #e0d9f5;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 1rem;
+}
+
+/* Titles */
+.doc-title {
+    font-family: 'Orbitron', sans-serif;
+    color: #6e0eff;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.section-title {
+    font-weight: 600;
+    color: #6e0eff;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.doc-date {
+    font-size: 0.85rem;
+}
+
+/* Document text */
+.doc-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #444;
+    padding: 0.3rem 0;
+}
+
+/* Themes & Insights */
+.theme-label {
+    font-weight: 600;
+    color: #6e0eff;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.insights-list {
+    padding-left: 1.2rem;
+}
+
+.insight-item {
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.insight-type {
+    font-weight: 600;
+    color: #9f57ff;
+}
+
+/* Buttons */
+.btn-secondary {
+    background: #dcdcdc;
+    color: #333;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.btn-secondary:hover {
+    background: #c0c0c0;
+}
+
+/* Scrollbar for insights if overflow */
+.theme-insights {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.theme-insights::-webkit-scrollbar {
+    width: 5px;
+}
+
+.theme-insights::-webkit-scrollbar-thumb {
+    background: rgba(110,14,255,0.3);
+    border-radius: 5px;
+}
+
+.theme-insights::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.03);
+}
+
+.table-responsive {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+    padding: 0.5rem 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(110,14,255,0.1);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(110,14,255,0.03);
+}
+
+.table thead th {
+    color: #6e0eff;
+    font-weight: 600;
+}
+
+.table td {
+    color: #444;
+}

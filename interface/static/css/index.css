@@ -154,3 +154,9 @@ body.bg-white-dashboard {
     color: #fff;
     font-weight: 600;
 }
+
+.filters-docs-separator {
+    border-top: 3px solid rgba(110,14,255,0.2);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    width: 100%;
+}

@@ -24,7 +24,7 @@ class Publications(Base):
 
 
 class LlmPipeline(Base):
-    __tablename__ = "llm_pipeline_model_2"
+    __tablename__ = "llm_pipeline"
     __table_args__ = {"schema": "nasa"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -37,7 +37,7 @@ class LlmPipeline(Base):
 
 
 class LlmMemory(Base):
-    __tablename__ = "llm_memory_model_2"
+    __tablename__ = "llm_memory"
     __table_args__ = {"schema": "nasa"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)

@@ -79,46 +79,45 @@ class BioInsightPipeline:
     def process_qwen(self, text, pipeline_id):
         """Use Qwen as a space biologist"""
         system = """
-        You are a senior space biologist with extensive expertise in the effects of space environments on biological systems. Your role is to deeply analyze scientific documents on space biology, 
-        identifying key themes without prior knowledge of the document's structure. 
-        Themes should emerge organically from the content, such as microgravity impacts on cellular processes,
-        cosmic radiation effects on DNA, sex-specific biological responses in space, regenerative potential of stem cells under altered gravity, 
-        or immunological changes during long-duration missions. For each theme, provide a rigorous, 
-        evidence-based interpretation focusing on scientific accuracy and implications for human space exploration.
-        Output must be scientifically rigorous and structured in JSON.
+        You are a senior space biologist. Your task is to analyze scientific documents on space biology, identifying key themes and insights.
+        Output must be strictly valid JSON, following the structure: points, cause_effects, cascade_effects, observations, impactful.
+        Do NOT include explanations, text, or markdown outside the JSON.
+        Focus on capturing all relevant scientific insights.
         """
 
         content_template = """
-        Analyze this chunk of the scientific document on space biology. Define main themes emerging from the text (e.g., microgravity-induced bone density loss, radiation-triggered cellular mutations, sex-specific metabolic adaptations). For each theme:
-        - Extract important points and impactful discoveries, citing specific mechanisms or findings from the text.
-        - Identify cause-effect correlations (e.g., reduced gravity causes decreased osteoblast activity leading to bone resorption).
-        - Deduce potential cascade effects (e.g., bone loss cascades into increased fracture risk, compromising mission safety and post-flight recovery).
-        - Highlight interesting observations for future research, including potential lacunas, areas of consensus or disagreement with existing literature, and actionable hypotheses for space missions.
+        Analyze the following chunk of a scientific document on space biology.
 
-        Integrate and refine themes from previous chunks to build a cohesive understanding. Analyze this chunk of text from a scientific document on space biology: {previous_themes}.
+        Previous accumulated themes: {previous_themes}
 
-        For each theme:
-            - Extract important points and discoveries.
-            - Identify cause-effect correlations.
-            - Deduce potential cascade effects.
-            - Highlight interesting observations for future research.
+        Instructions:
+        - Identify main themes emerging from the text.
+        - For each theme, extract:
+        - points: important findings
+        - cause_effects: cause -> effect relationships
+        - cascade_effects: downstream consequences
+        - observations: notes for future research or interesting phenomena
+        - impactful: insights with high significance or implications
 
-        Output strictly in valid JSON without additional text:
+        Ensure:
+        - Themes emerge from the text itself, do NOT invent them.
+        - JSON output must match exactly the following structure:
+
         {{
-            "themes": {{
-                "theme_name": {{
-                    "points": ["point1", "point2"],
-                    "cause_effects": ["cause1 -> effect1", "cause2 -> effect2"],
-                    "cascade_effects": ["effect1 -> cascade1 -> cascade2"],
-                    "observations": ["observation1 with research implication", "observation2"],
-                    "impactful": [...],
-
-                }},
-                ...
-            }}
+        "themes": {{
+            "theme_name": {{
+            "points": ["..."],
+            "cause_effects": ["..."],
+            "cascade_effects": ["..."],
+            "observations": ["..."],
+            "impactful": ["..."]
+            }},
+            ...
+        }}
         }}
 
-        Chunk: {chunk}
+        Text chunk:
+        {chunk}
         """
 
         chunks = self.chunk_text(text)
@@ -140,7 +139,7 @@ class BioInsightPipeline:
             ]
 
             try:
-                response = ollama.chat(model="qwen2.5:7b-instruct", messages=messages)
+                response = ollama.chat(model="qwen2.5:1.5b-instruct-q4_0", messages=messages)
                 raw_content = response.get("message", {}).get("content", "").strip()
                 log.info(f"Response QWWEN Cientific: {response}")
 
