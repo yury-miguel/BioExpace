@@ -69,6 +69,7 @@ class Database:
         """Creates or updates the execution record of an LLM step"""
         session = self.Session()
         try:
+            print("CHEGOU insert_llm_pipeline")
             pipeline = LlmPipeline(
                 publication_id=publication_id,
                 stage=stage,
@@ -91,6 +92,7 @@ class Database:
         """Saves the state (incremental memory) of an LLM run"""
         session = self.Session()
         try:
+            print("CHEGOU insert_llm_memory")
             mem = LlmMemory(
                 pipeline_id=pipeline_id,
                 model_name=model_name,

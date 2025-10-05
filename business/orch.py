@@ -25,7 +25,7 @@ class BioInsightPipeline:
         log.info(f"🚀 Starting LLM interpretation pipeline for {len(docs)} documents")
 
         for doc in docs:
-            log.info(f"🧩 Processing {doc.title}")
+            log.info(f"🧩 Processing {doc.id} - {doc.title}")
             log.debug(f"Document length: {len(doc.text_extratect)} characters")
 
             # === Stage 1: Scientific interpretation (Qwen) ===
@@ -65,7 +65,7 @@ class BioInsightPipeline:
             )
             log.info("🏁 LLM pipeline completed for all documents.")
 
-    def chunk_text(self, text: str, max_tokens: int = 500):
+    def chunk_text(self, text: str, max_tokens: int = 700):
         """Divide the text into chunks with a token limit"""
         enc = tiktoken.get_encoding("cl100k_base")
         tokens = enc.encode(text)
@@ -140,8 +140,9 @@ class BioInsightPipeline:
             ]
 
             try:
-                response = ollama.chat(model="qwen2.5:1.5b-instruct-q4_0", messages=messages)
+                response = ollama.chat(model="qwen2.5:7b-instruct", messages=messages)
                 raw_content = response.get("message", {}).get("content", "").strip()
+                log.info(f"Response QWWEN Cientific: {response}")
 
                 if raw_content.startswith("```json"):
                     raw_content = raw_content.removeprefix("```json").removesuffix("```").strip()
@@ -209,11 +210,12 @@ class BioInsightPipeline:
         ]
         try:
             log.info("📡 [Llama] Starting synthesis phase")
-            response = ollama.chat(model="llama3:8b-instruct-q4_0", messages=messages)
+            response = ollama.chat(model="llama3:8b", messages=messages)
             raw = response["message"]["content"].strip()
             if not raw.endswith("}"):
                 raw += "}"
             data = json.loads(raw)
+            log.info(f"Response LLAMA Analisys: {response}")
             self.handle.call("insert_llm_memory", pipeline_id=pipeline_id, model_name="llama", chunk_index=0, context_json=data)
             log.info("✅ [Llama] Insight synthesis complete")
             return data
