@@ -13,7 +13,7 @@ import tiktoken
 from business.handle_db import HandlerDatabase
 
 from logs import config as save
-log = save.setup_logs('orch_debug.txt')
+log = save.setup_logs('orchestrator_debug.txt')
 
 
 class BioInsightPipeline:

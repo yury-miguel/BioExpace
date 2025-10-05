@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 from logs import config as save
-from models_bio.models_db import (Publications)
+from models_bio.models_db import (Publications, LlmPipeline, LlmMemory)
 log = save.setup_logs('database_debug.txt')
 
 
